@@ -2,14 +2,13 @@ pipeline {
     agent any
 
     triggers {
-        pollSCM('* * * * *')
+        githubPush()
     }
 
     environment {
         DOCKER = credentials('DockerHub')
         IMAGE = 'notes-app'
-        SERVER_IP = '13.200.147.207'
-        DIR = '/home/ubuntu/django-cicd-jenkins2'
+        DIR = '/home/ubuntu/django-cicd-jenkins_remote'
     }
 
     stages {
@@ -17,7 +16,7 @@ pipeline {
         stage("code pull") {
             steps {
                 echo "pulling code"
-                git branch: 'main', url: 'https://github.com/adil-khan-723/django-cicd-jenkins2.git'
+                git branch: 'branch', url: 'https://github.com/adil-khan-723/django-cicd-jenkins_remote.git'
                 echo "code pull successful"
             }
         }
@@ -30,7 +29,7 @@ pipeline {
         }
 
         stage("push to dockerhub") {
-            steps{
+            steps {
                 echo "pushing the image to dockerhub"
                 sh "docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}"
                 echo "login successful tagging the image ...."
@@ -40,29 +39,17 @@ pipeline {
             }
         }
 
-        stage("deploy to cloud"){
-            steps{
-                sshagent(credentials: ['ssh']){
-                    sh """ssh -o StrictHostKeyChecking=no ubuntu@${SERVER_IP} '
-                        if [ -d $DIR ]; then
-                            cd $DIR && git pull
-                        else
-                            git clone https://github.com/adil-khan-723/django-cicd-jenkins2.git
-                        fi 
-                        docker system prune -af && \
-                        cd $DIR && \
-                        docker compose down && \
-                        docker compose up --build -d
-                        '
-                    """
-                    echo "deploy successful"
-                }
+        stage("deploy to ec2") {
+            steps {
+                    sh "docker system prune -af"
+                    sh "docker compose down"
+                    sh "docker compose up --build -d "
             }
         }
     }
     post {
         success {
-            echo "pipeline ran successfully"
+            echo "pipeline ran successfully "
         }
         failure {
             echo "pipeline failed check logs for errors"
