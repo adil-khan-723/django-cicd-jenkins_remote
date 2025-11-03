@@ -42,7 +42,7 @@ pipeline {
         stage("deploy to ec2") {
             steps {
                 sh """ 
-                    if[ -d $DIR ]; then
+                    if [ -d $DIR ]; then
                         echo 'source code exists pulling changs from remote' && \
                         cd $DIR && \
                         git pull
@@ -54,7 +54,7 @@ pipeline {
 
                     docker system prune -af && \
                     docker compose down && \
-                    docker compose up --build
+                    docker compose up --build -d 
                 """
             }
         }
