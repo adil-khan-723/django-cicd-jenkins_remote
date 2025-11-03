@@ -41,16 +41,16 @@ pipeline {
 
         stage("deploy to ec2") {
             steps {
-                sh """ 
+                sh '''
                     if [ -d $DIR ]; then
-                        echo 'source code exists pulling changs from remote' && \
-                        cd $DIR && \
+                        echo "source code exists pulling changs from remote"
+                        cd $DIR 
                         git pull
                     else 
-                        echo 'directory does not exists cloning the repo' && \
-                        cd && \
+                        echo "directory does not exists cloning the repo" 
+                        cd 
                         git clone https://github.com/adil-khan-723/django-cicd-jenkins_remote.git
-                    fi """
+                    fi '''
 
                     sh "docker system prune -af"
                     sh "docker compose down"
