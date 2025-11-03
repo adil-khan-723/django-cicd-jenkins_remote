@@ -8,8 +8,7 @@ pipeline {
     environment {
         DOCKER = credentials('DockerHub')
         IMAGE = 'notes-app'
-        SERVER_IP = '13.200.147.207'
-        DIR = '/home/ubuntu/django-cicd-jenkins2'
+        DIR = '/home/ubuntu/django-cicd-jenkins_remote'
     }
 
     stages {
@@ -17,7 +16,7 @@ pipeline {
         stage("code pull") {
             steps {
                 echo "pulling code"
-                git branch: 'main', url: 'https://github.com/adil-khan-723/django-cicd-jenkins2.git'
+                git branch: 'main', url: 'https://github.com/adil-khan-723/django-cicd-jenkins_remote.git'
                 echo "code pull successful"
             }
         }
@@ -30,7 +29,7 @@ pipeline {
         }
 
         stage("push to dockerhub") {
-            steps{
+            steps {
                 echo "pushing the image to dockerhub"
                 sh "docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}"
                 echo "login successful tagging the image ...."
@@ -40,23 +39,23 @@ pipeline {
             }
         }
 
-        stage("deploy to cloud"){
-            steps{
-                sshagent(credentials: ['ssh']){
-                    sh """ssh -o StrictHostKeyChecking=no ubuntu@${SERVER_IP} '
-                        if [ -d $DIR ]; then
-                            cd $DIR && git pull
-                        else
-                            git clone https://github.com/adil-khan-723/django-cicd-jenkins2.git
-                        fi 
-                        docker system prune -af && \
+        stage("deploy to ec2") {
+            steps {
+                sh """ 
+                    if[ -d $DIR ]; then
+                        echo 'source code exists pulling changs from remote' && \
                         cd $DIR && \
-                        docker compose down && \
-                        docker compose up --build -d
-                        '
-                    """
-                    echo "deploy successful"
-                }
+                        git pull
+                    else 
+                        echo 'directory doesn't exists cloning the repo' && \
+                        cd && \
+                        git clone https://github.com/adil-khan-723/django-cicd-jenkins_remote.git
+                    fi 
+
+                    docker system prune -af && \
+                    docker compose down && \
+                    docker compose up --build
+                """
             }
         }
     }
