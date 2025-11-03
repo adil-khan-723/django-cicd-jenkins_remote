@@ -50,12 +50,11 @@ pipeline {
                         echo 'directory doesn't exists cloning the repo' && \
                         cd && \
                         git clone https://github.com/adil-khan-723/django-cicd-jenkins_remote.git
-                    fi 
+                    fi """
 
-                    docker system prune -af && \
-                    docker compose down && \
-                    docker compose up --build -d 
-                """
+                    sh "docker system prune -af"
+                    sh "docker compose down"
+                    sh "docker compose up --build -d "
             }
         }
     }
