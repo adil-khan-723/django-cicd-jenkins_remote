@@ -47,7 +47,7 @@ pipeline {
                         cd $DIR && \
                         git pull
                     else 
-                        echo 'directory doesn't exists cloning the repo' && \
+                        echo 'directory doesn\'t exists cloning the repo' && \
                         cd && \
                         git clone https://github.com/adil-khan-723/django-cicd-jenkins_remote.git
                     fi """
